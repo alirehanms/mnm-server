@@ -18,7 +18,4 @@ paramName='innodb_buffer_pool_size'
 value='1000000000'
 grep -q "^[[:space:]]*#*[[:space:]]*$paramName" $fileName && sed -i 's/^[[:space:]]*#*[[:space:]]*$paramName.*/$paramName=$value/' $fileName || echo "$paramName=$value" >>$fileName
 
-
-
-echo "SET GLOBAL $paramName=$value" >out.txt
-mysql<out.txt
+mysql -e "SET GLOBAL $paramName=$value"

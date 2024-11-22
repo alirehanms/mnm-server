@@ -22,11 +22,11 @@ sudo systemctl enable nginx
 # sudo ufw allow 'Nginx HTTP' 
 
 
-echo "DELETE FROM mysql.user WHERE User='';" >out.txt
-echo "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');" >>out.txt
-echo "DROP DATABASE IF EXISTS test;" >>out.txt
-echo "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';" >>out.txt
-echo "FLUSH PRIVILEGES;" >>out.txt
+mysql -e "DELETE FROM mysql.user WHERE User='';"
+mysql -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
+mysql -e "DROP DATABASE IF EXISTS test;"
+mysql -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
+mysql -e "FLUSH PRIVILEGES;"
 
 
 
@@ -113,9 +113,7 @@ fi
 # bashscript.sh
 set +o history 
 random_string=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32) >/dev/null2 >&1
-echo "ALTER USER 'app'@'localhost' IDENTIFIED BY '$random_string';" >out.txt
-mysql <out.txt
-rm out.txt
+mysql -e "ALTER USER 'app'@'localhost' IDENTIFIED BY '$random_string';"
 nodejs /var/api/3u-engine/dist/index.js $random_string
 set -o history
 

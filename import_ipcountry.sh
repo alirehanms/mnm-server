@@ -36,15 +36,13 @@ fi
 
 echo "Found IPCountry.mysql.dump at $DUMP_FILE"
 
+mysql -e 'USE ip2location;'
+mysql -e 'TRUNCATE TABLE ipcountry;'
 sed -i '1,15d' $DUMP_FILE
-sed -i '1i TRUNCATE TABLE ipcountry;' $DUMP_FILE
-sed -i '1i USE ip2location;' $DUMP_FILE
 mysql < $DUMP_FILE
 
-echo "RENAME TABLE ip_country TO ipcountry_old;" > out.txt
-echo "RENAME TABLE ipcountry TO ip_country;" >> out.txt
-echo "RENAME TABLE ipcountry_old TO ipcountry;" >> out.txt
-mysql < out.txt
-rm out.txt
+mysql -e "RENAME TABLE ip_country TO ipcountry_old;"
+mysql -e "RENAME TABLE ipcountry TO ip_country;"
+mysql -e "RENAME TABLE ipcountry_old TO ipcountry;"
 rm -rf $TEMP_DIR
 echo "SQL INSERT statements have been updated to $DUMP_FILE"

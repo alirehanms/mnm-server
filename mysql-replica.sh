@@ -25,5 +25,5 @@ SOURCE_LOG_POS=157;
 START REPLICA;
 # Verifying Replication
 # To check the status of the replication on the replica server:
-	SHOW REPLICA STATUS\G
+SHOW REPLICA STATUS\G
 
