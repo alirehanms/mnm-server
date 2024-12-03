@@ -32,9 +32,12 @@ else
   echo "MySQL APT config package already downloaded."
 fi
 
+
+echo "mysql-apt-config mysql-apt-config/select-server select mysql-8.4-lts" | sudo debconf-set-selections
+
 # Install the MySQL APT repository
 echo "Configuring MySQL APT repository..."
-dpkg -i "$MYSQL_DEB_PACKAGE" -y
+dpkg -i "$MYSQL_DEB_PACKAGE" 
 
 # Update package information
 echo "Updating package list..."

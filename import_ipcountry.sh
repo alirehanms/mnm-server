@@ -36,13 +36,15 @@ fi
 
 echo "Found IPCountry.mysql.dump at $DUMP_FILE"
 
-mysql -e 'USE ip2location;'
-mysql -e 'TRUNCATE TABLE ipcountry;'
-sed -i '1,15d' $DUMP_FILE
-mysql < $DUMP_FILE
 
-mysql -e "RENAME TABLE ip_country TO ipcountry_old;"
-mysql -e "RENAME TABLE ipcountry TO ip_country;"
-mysql -e "RENAME TABLE ipcountry_old TO ipcountry;"
+mysql -e 'TRUNCATE TABLE geolocation.ipcountry;'
+sed -i '1,15d' $DUMP_FILE
+sed -i '1i USE geolocation;\n' $DUMP_FILE
+echo "Starting import, it may take few minutes..."
+mysql < $DUMP_FILE
+ 
+mysql -e "RENAME TABLE geolocation.ip_country TO geolocation.ipcountry_old;"
+mysql -e "RENAME TABLE geolocation.ipcountry TO geolocation.ip_country;"
+mysql -e "RENAME TABLE geolocation.ipcountry_old TO geolocation.ipcountry;"
 rm -rf $TEMP_DIR
 echo "SQL INSERT statements have been updated to $DUMP_FILE"

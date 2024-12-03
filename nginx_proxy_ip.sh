@@ -2,11 +2,11 @@
 
 # Variables
 IP_ADDRESS="$1"  # Use the machine's IP address
-APP_NAME="$2"
-APP_PORT="$3"
+APP_NAME="$2"    # Application name
+APP_PORT="$3"    # Application port
 NGINX_CONF_DIR="/etc/nginx/sites-available"
 NGINX_ENABLED_DIR="/etc/nginx/sites-enabled"
-NGINX_CONF_FILE="${NGINX_CONF_DIR}/reverse-proxy.conf"
+NGINX_CONF_FILE="${NGINX_CONF_DIR}/reverse-proxy.conf"  # Single file for all apps
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -35,29 +35,37 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Validate input
-if [ -z "$IP_ADDRESS" ] || [ -z "$APP_PORT" ]; then
-    print_error "Usage: $0 <ip_address> <app_port>"
+if [ -z "$IP_ADDRESS" ] || [ -z "$APP_NAME" ] || [ -z "$APP_PORT" ]; then
+    print_error "Usage: $0 <ip_address> <app_name> <app_port>"
 fi
 
 # Ensure NGINX is installed
 check_command nginx
 
-# Create NGINX configuration
-echo "Creating NGINX configuration for IP: $IP_ADDRESS..."
-cat > "$NGINX_CONF_FILE" <<EOL
+# Create or update the NGINX configuration for the reverse proxy
+echo "Updating NGINX configuration for IP: $IP_ADDRESS..."
+if [ ! -f "$NGINX_CONF_FILE" ]; then
+    # Create the initial server block if it doesn't exist
+    cat > "$NGINX_CONF_FILE" <<EOL
 server {
     listen 80;
-    server_name $IP_ADDRESS;  # Use IP address instead of domain name
+    server_name $IP_ADDRESS;
 
-    location /$APP_NAME {
-        proxy_pass http://127.0.0.1:$APP_PORT;  # Forward to the app running on the specified port
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
+    # Default fallback for unmatched requests
+    location / {
+        return 404;
     }
 }
 EOL
+fi
+
+# Check if the app-specific location block already exists
+if grep -q "location /$APP_NAME" "$NGINX_CONF_FILE"; then
+    print_error "Configuration for $APP_NAME already exists. Use a different name."
+else
+    # Insert the app-specific location block before the closing "}" of the server block
+    sed -i "/^}$/i\    # Proxy for $APP_NAME\n    location /$APP_NAME {\n        rewrite ^/$APP_NAME/(.*)\$ /\$1  break;\n        proxy_pass http://127.0.0.1:$APP_PORT;\n        proxy_set_header Host \$host;\n        proxy_set_header X-Real-IP \$remote_addr;\n        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto \$scheme;\n    }\n" "$NGINX_CONF_FILE"
+fi
 
 # Enable the configuration
 ln -sf "$NGINX_CONF_FILE" "${NGINX_ENABLED_DIR}/reverse-proxy.conf" || print_error "Failed to enable NGINX configuration."
@@ -68,7 +76,7 @@ nginx -t || print_error "NGINX configuration test failed."
 # Reload NGINX
 echo "Reloading NGINX..."
 nginx -s reload || print_error "Failed to reload NGINX."
-print_success "NGINX configuration for $IP_ADDRESS has been added and reloaded."
+print_success "NGINX configuration for $APP_NAME has been added and reloaded."
 
 # Success message
-print_success "Setup completed! Your app is now accessible at http://$IP_ADDRESS/$APP_NAME"
+print_success "Setup completed! Your app $APP_NAME is now accessible at http://$IP_ADDRESS/$APP_NAME"

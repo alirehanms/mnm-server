@@ -22,11 +22,11 @@ sudo systemctl enable nginx
 # sudo ufw allow 'Nginx HTTP' 
 
 
-mysql -e "DELETE FROM mysql.user WHERE User='';"
-mysql -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
-mysql -e "DROP DATABASE IF EXISTS test;"
-mysql -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
-mysql -e "FLUSH PRIVILEGES;"
+# mysql -e "DELETE FROM mysql.user WHERE User='';"
+# mysql -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
+# mysql -e "DROP DATABASE IF EXISTS test;"
+# mysql -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
+# mysql -e "FLUSH PRIVILEGES;"
 
 
 
@@ -50,26 +50,72 @@ echo '-----END OPENSSH PRIVATE KEY-----'>>/root/.ssh/id_ed25519
 chmod 600 /root/.ssh/id_ed25519
 
 eval "$(ssh-agent -s)"
-ssh-add /root/.ssh/id_ed25519
+
+ssh-add /srv/3ulogging/ssh/3uLoggingDB
 
 
 
-# ssh-keygen -t ed25519 -C "your_email@example.com"
+ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f 3ulogging -N ""
+ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f 3uloggingDB -N ""
 mkdir /srv/MnM
 mkdir /srv/cnfg
-mkdir /srv/3uLogging
-mkdir /srv/ip2location
+mkdir /srv/3ulogging
+
 mkdir /srv/replaylogs
 
-mkdir /srv/3uLogging/exec
-mkdir /srv/3uLogging/repo
-mkdir /srv/3uLogging/conf
-mkdir /srv/3uLogging/rbck
+mkdir /srv/3ulogging/prod
+mkdir /srv/3ulogging/repo
+mkdir /srv/3ulogging/conf
+mkdir /srv/3ulogging/rbck
+mkdir /srv/3ulogging/scripts
+mkdir /srv/3ulogging/ssh
 
 
-cd /srv/api/
-GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" git clone git@github.com:advcomm/3u-engine.git #read-access only to repo
-cd 3u-engine
+GIT_SSH_COMMAND="ssh -i /srv/3ulogging/ssh/3ulogging -o StrictHostKeyChecking=no" git clone git@github.com:3ugg/logging-prod.git
+GIT_SSH_COMMAND="ssh -i /srv/3ulogging/ssh/3uloggingdb -o StrictHostKeyChecking=no" git clone git@github.com:3ugg/3uloggingdb.git
+
+
+/srv/scripts/nginx_proxy_ip.sh 37.27.189.44 3ulogging 9502
+
+# ========================================= geolocation ===========================================
+mkdir /srv/geolocation
+mkdir /srv/geolocation/prod
+mkdir /srv/geolocation/repo
+mkdir /srv/geolocation/conf
+mkdir /srv/geolocation/rbck
+mkdir /srv/geolocation/scripts
+mkdir /srv/geolocation/ssh
+
+ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f /srv/geolocation/ssh/geolocation -N ""
+ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f /srv/geolocation/ssh/geolocationdb -N ""
+cd /srv/geolocation/repo
+GIT_SSH_COMMAND="ssh -i /srv/geolocation/ssh/geolocationdb -o StrictHostKeyChecking=no" git clone git@github.com:advcomm/geolocationdb.git
+
+
+cd /srv/scripts
+nano mysql_user.sh
+chmod +x mysql_user.sh
+./mysql_user.sh geolocation
+nano update_db.sh
+chmod +x update_db.sh
+/srv/scripts/update_db.sh  /srv/geolocation/backup/mysql /srv/geolocation/repo/geolocationdb   /srv/geolocation/ssh/geolocationdb geolocation
+
+cd /srv/geolocation/scripts 
+nano import_ipcountry.sh
+chmod +x import_ipcountry.sh
+/srv/geolocation/scripts/import_ipcountry.sh "https://www.ip2location.com/download?token=U0n6gjf3pM7FDZyyS7vGCqsTcV1ju93okU3ho7q4uoymGWEW3UFjQ7zHF8sfjdXi&file=DB1"  
+
+
+cd /srv/geolocation/repo
+GIT_SSH_COMMAND="ssh -i /srv/geolocation/ssh/geolocation -o StrictHostKeyChecking=no" git clone git@github.com:advcomm/geolocation-prod.git
+
+cd /srv/geolocation/scripts
+nano startapp.sh
+chmod +x startapp.sh
+
+
+/srv/scripts/update_fetch_pm2.sh /srv/geolocation/backup /srv/geolocation/repo/geolocation-prod /srv/geolocation/ssh/geolocation  geolocation 
+/srv/scripts/nginx_proxy_ip.sh 37.27.189.44 geolocation 9504
 
 # =================================================================================================================
 #git fetch origin
