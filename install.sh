@@ -103,7 +103,7 @@ chmod +x update_db.sh
 cd /srv/geolocation/scripts 
 nano import_ipcountry.sh
 chmod +x import_ipcountry.sh
-/srv/geolocation/scripts/import_ipcountry.sh "https://www.ip2location.com/download?token=U0n6gjf3pM7FDZyyS7vGCqsTcV1ju93okU3ho7q4uoymGWEW3UFjQ7zHF8sfjdXi&file=DB1"  
+/srv/geolocation/scripts/import_ipcountry.sh "U0n6gjf3pM7FDZyyS7vGCqsTcV1ju93okU3ho7q4uoymGWEW3UFjQ7zHF8sfjdXi"  
 
 
 cd /srv/geolocation/repo
