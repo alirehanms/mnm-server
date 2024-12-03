@@ -66,9 +66,15 @@ if ! command -v certbot &>/dev/null; then
     apt update && apt install -y certbot python3-certbot-nginx || print_error "Failed to install Certbot."
 fi
 
-# Obtain an SSL certificate
-echo "Obtaining SSL certificate for $DOMAIN..."
-certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos -m "admin@$DOMAIN" || print_error "Failed to obtain SSL certificate."
+# Check if a wildcard SSL certificate already exists for the domain
+if certbot certificates | grep -q "$DOMAIN"; then
+    print_success "Wildcard SSL certificate already exists for $DOMAIN."
+else
+    # Obtain a wildcard SSL certificate if not already available
+    echo "Obtaining wildcard SSL certificate for $DOMAIN..."
+    certbot --nginx -d "*.$DOMAIN" --non-interactive --agree-tos -m "admin@$DOMAIN" || print_error "Failed to obtain wildcard SSL certificate."
+    print_success "Wildcard SSL certificate obtained for $DOMAIN."
+fi
 
 # Reload NGINX after SSL configuration
 echo "Reloading NGINX after SSL setup..."

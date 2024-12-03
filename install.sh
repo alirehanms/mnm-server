@@ -59,10 +59,11 @@ ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f 3ulogging -N ""
 ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f 3uloggingDB -N ""
 mkdir /srv/MnM
 mkdir /srv/cnfg
-mkdir /srv/3ulogging
+
 
 mkdir /srv/replaylogs
 
+mkdir /srv/3ulogging
 mkdir /srv/3ulogging/prod
 mkdir /srv/3ulogging/repo
 mkdir /srv/3ulogging/conf
@@ -95,7 +96,7 @@ GIT_SSH_COMMAND="ssh -i /srv/geolocation/ssh/geolocationdb -o StrictHostKeyCheck
 cd /srv/scripts
 nano mysql_user.sh
 chmod +x mysql_user.sh
-./mysql_user.sh geolocation
+/srv/scripts/mysql_user.sh geolocation
 nano update_db.sh
 chmod +x update_db.sh
 /srv/scripts/update_db.sh  /srv/geolocation/backup/mysql /srv/geolocation/repo/geolocationdb   /srv/geolocation/ssh/geolocationdb geolocation
@@ -116,6 +117,25 @@ chmod +x startapp.sh
 
 /srv/scripts/update_fetch_pm2.sh /srv/geolocation/backup /srv/geolocation/repo/geolocation-prod /srv/geolocation/ssh/geolocation  geolocation 
 /srv/scripts/nginx_proxy_ip.sh 37.27.189.44 geolocation 9504
+
+
+# ========================================= 3uengine ===========================================
+mkdir /srv/3uengine
+mkdir /srv/3uengine/prod
+mkdir /srv/3uengine/repo
+mkdir /srv/3uengine/conf
+mkdir /srv/3uengine/rbck
+mkdir /srv/3uengine/scripts
+mkdir /srv/3uengine/ssh
+
+ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f /srv/3uengine/ssh/3uengine -N ""
+/srv/scripts/mysql_user.sh 3uengine
+
+cd /srv/3uengine/repo
+GIT_SSH_COMMAND="ssh -i /srv/3uengine/ssh/3uengine -o StrictHostKeyChecking=no" git clone git@github.com:3ugg/3uengine-prod.git
+
+/srv/scripts/update_fetch_pm2.sh /srv/3uengine/backup /srv/3uengine/repo/3uengine-prod /srv/3uengine/ssh/3uengine  3uengine 
+/srv/scripts/nginx_ssl.sh 3u.gg 9501
 
 # =================================================================================================================
 #git fetch origin
