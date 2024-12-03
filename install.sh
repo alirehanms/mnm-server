@@ -118,6 +118,43 @@ chmod +x startapp.sh
 /srv/scripts/update_fetch_pm2.sh /srv/geolocation/backup /srv/geolocation/repo/geolocation-prod /srv/geolocation/ssh/geolocation  geolocation 
 /srv/scripts/nginx_proxy_ip.sh 37.27.189.44 geolocation 9504
 
+# ========================================= 3uadmin ===========================================
+mkdir /srv/3uadmin
+mkdir /srv/3uadmin/prod
+mkdir /srv/3uadmin/repo
+mkdir /srv/3uadmin/conf
+mkdir /srv/3uadmin/rbck
+mkdir /srv/3uadmin/scripts
+mkdir /srv/3uadmin/ssh
+
+ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f /srv/3uadmin/ssh/3uadmin -N ""
+ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f /srv/3uadmin/ssh/3uadmindb -N ""
+
+cd /srv/3uadmin/scripts
+nano mysql_admin_user.sh
+chmod +x mysql_admin_user.sh
+/srv/3uadmin/scripts/mysql_admin_user.sh
+
+
+cd /srv/3uadmin/repo
+GIT_SSH_COMMAND="ssh -i /srv/3uadmin/ssh/3uadmindb -o StrictHostKeyChecking=no" git clone git@github.com:3ugg/3uadmindb.git
+
+/srv/scripts/update_db.sh  /srv/3uadmin/backup/mysql /srv/3uadmin/repo/3uadmindb   /srv/3uadmin/ssh/3uadmindb 3uadmin
+
+
+cd /srv/3uadmin/repo
+GIT_SSH_COMMAND="ssh -i /srv/3uadmin/ssh/3uadmin -o StrictHostKeyChecking=no" git clone git@github.com:3ugg/3uadmin-prod.git
+
+cd /srv/3uadmin/conf
+nano serverapi.env
+
+/srv/scripts/update_fetch_pm2.sh /srv/3uadmin/backup /srv/3uadmin/repo/3uadmin-prod /srv/3uadmin/ssh/3uadmin  3uadmin 
+
+
+
+/srv/scripts/nginx_proxy_ip.sh 37.27.189.44 3uadmin 9504
+
+
 
 # ========================================= 3uengine ===========================================
 mkdir /srv/3uengine
@@ -136,6 +173,8 @@ GIT_SSH_COMMAND="ssh -i /srv/3uengine/ssh/3uengine -o StrictHostKeyChecking=no" 
 
 /srv/scripts/update_fetch_pm2.sh /srv/3uengine/backup /srv/3uengine/repo/3uengine-prod /srv/3uengine/ssh/3uengine  3uengine 
 /srv/scripts/nginx_ssl.sh 3u.gg 9501
+
+
 
 # =================================================================================================================
 #git fetch origin
