@@ -53,16 +53,57 @@ eval "$(ssh-agent -s)"
 
 ssh-add /srv/3ulogging/ssh/3uLoggingDB
 
+#================================= common scripts===============================
+# Install Nginx
+sudo apt install nginx -y
+sudo ufw allow 22
+sudo ufw allow 'Nginx HTTP'
+sudo ufw allow 'Nginx HTTPS'
+sudo ufw enable -y
+sudo systemctl restart nginx
+sudo systemctl start nginx
 
+# Node installation..
+sudo apt-get install -y curl
+curl -fsSL https://deb.nodesource.com/setup_23.x -o nodesource_setup.sh
+sudo -E bash nodesource_setup.sh
+sudo apt-get install -y nodejs
+node -v
 
-ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f 3ulogging -N ""
-ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f 3uloggingDB -N ""
+#sudo pm2 completion install
+sudo npm install pm2@latest -g && pm2 update
+
+mkdir /srv/scripts
+
+#Install mysql community server..
+nano mysql.sh
+chmod +x mysql.sh
+./mysql.sh 
+
+nano mysql_user.sh
+chmod +x mysql_user.sh
+
+nano update_db.sh
+chmod +x update_db.sh
+
+nano update_fetch_pm2.sh
+chmod +x update_fetch_pm2.sh
+
+nano nginx_proxy_ip.sh
+chmod +x nginx_proxy_ip.sh
+
+nano startapp.sh
+chmod +x startapp.sh
+
+nano update_static.sh
+chmod +x update_static.sh
+
+#================================== apps =======================================
 mkdir /srv/MnM
 mkdir /srv/cnfg
-
-
 mkdir /srv/replaylogs
 
+# ========================================== 3ulogging ==========================================
 mkdir /srv/3ulogging
 mkdir /srv/3ulogging/prod
 mkdir /srv/3ulogging/repo
@@ -72,10 +113,19 @@ mkdir /srv/3ulogging/scripts
 mkdir /srv/3ulogging/ssh
 
 
-GIT_SSH_COMMAND="ssh -i /srv/3ulogging/ssh/3ulogging -o StrictHostKeyChecking=no" git clone git@github.com:3ugg/logging-prod.git
+ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f /srv/3ulogging/ssh/3ulogging -N ""
+ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f /srv/3ulogging/ssh/3uloggingdb -N ""
+
+cd /srv/3ulogging/repo
 GIT_SSH_COMMAND="ssh -i /srv/3ulogging/ssh/3uloggingdb -o StrictHostKeyChecking=no" git clone git@github.com:3ugg/3uloggingdb.git
+cd /srv/scripts
+/srv/scripts/mysql_user.sh 3ulogging
+/srv/scripts/update_db.sh  /srv/3ulogging/backup/mysql /srv/3ulogging/repo/3uloggingdb   /srv/3ulogging/ssh/3uloggingdb 3ulogging
 
+cd /srv/3ulogging/repo
+GIT_SSH_COMMAND="ssh -i /srv/3ulogging/ssh/3ulogging -o StrictHostKeyChecking=no" git clone git@github.com:3ugg/logging-prod.git
 
+/srv/scripts/update_fetch_pm2.sh /srv/3ulogging/backup /srv/3ulogging/repo/3ulogging-prod /srv/3ulogging/ssh/3ulogging 3ulogging
 /srv/scripts/nginx_proxy_ip.sh 37.27.189.44 3ulogging 9502
 
 # ========================================= geolocation ===========================================
@@ -115,7 +165,7 @@ nano startapp.sh
 chmod +x startapp.sh
 
 
-/srv/scripts/update_fetch_pm2.sh /srv/geolocation/backup /srv/geolocation/repo/geolocation-prod /srv/geolocation/ssh/geolocation  geolocation 
+/srv/scripts/update_fetch_pm2.sh /srv/geolocation/backup /srv/geolocation/repo/geolocation-prod /srv/geolocation/ssh/geolocation geolocation
 /srv/scripts/nginx_proxy_ip.sh 37.27.189.44 geolocation 9504
 
 # ========================================= 3uadmin ===========================================
@@ -148,11 +198,9 @@ GIT_SSH_COMMAND="ssh -i /srv/3uadmin/ssh/3uadmin -o StrictHostKeyChecking=no" gi
 cd /srv/3uadmin/conf
 nano serverapi.env
 
-/srv/scripts/update_fetch_pm2.sh /srv/3uadmin/backup /srv/3uadmin/repo/3uadmin-prod /srv/3uadmin/ssh/3uadmin  3uadmin 
+/srv/scripts/update_fetch_pm2.sh /srv/3uadmin/backup /srv/3uadmin/repo/3uadmin-prod /srv/3uadmin/ssh/3uadmin 3uadmin
 
-
-
-/srv/scripts/nginx_proxy_ip.sh 37.27.189.44 3uadmin 9504
+#/srv/scripts/nginx_proxy_ip.sh 37.27.189.44 3uadmin 9504
 
 
 
@@ -171,10 +219,27 @@ ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f /srv/3uengine/ssh/3ueng
 cd /srv/3uengine/repo
 GIT_SSH_COMMAND="ssh -i /srv/3uengine/ssh/3uengine -o StrictHostKeyChecking=no" git clone git@github.com:3ugg/3uengine-prod.git
 
-/srv/scripts/update_fetch_pm2.sh /srv/3uengine/backup /srv/3uengine/repo/3uengine-prod /srv/3uengine/ssh/3uengine  3uengine 
+/srv/scripts/update_fetch_pm2.sh /srv/3uengine/backup /srv/3uengine/repo/3uengine-prod /srv/3uengine/ssh/3uengine 3uengine
 /srv/scripts/nginx_ssl.sh 3u.gg 9501
 
+# ========================================= 3uadmingui ===========================================
+mkdir /srv/3uadmingui
+mkdir /srv/3uadmingui/prod
+mkdir /srv/3uadmingui/repo
+mkdir /srv/3uadmingui/conf
+mkdir /srv/3uadmingui/rbck
+mkdir /srv/3uadmingui/scripts
+mkdir /srv/3uadmingui/ssh
 
+ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f /srv/3uadmingui/ssh/3uadmingui -N ""
+/srv/scripts/mysql_user.sh 3uadmingui
+
+cd /srv/3uadmingui/repo
+GIT_SSH_COMMAND="ssh -i /srv/3uadmingui/ssh/3uadmingui -o StrictHostKeyChecking=no" git clone git@github.com:3ugg/3uadmingui-prod.git
+
+#/srv/scripts/deploy_angular_nginx.sh my-app myapp.example.com /var/www/my-app/dist /etc/letsencrypt/live/example.com
+
+/srv/scripts/update_static.sh /srv/3uadmingui/backup /srv/3uadmingui/repo/3uadmingui-prod /srv/3uadmingui/ssh/3uadmingui 
 
 # =================================================================================================================
 #git fetch origin

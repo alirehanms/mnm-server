@@ -86,7 +86,7 @@ echo "Exec folder updated successfully."
 # Start or restart the PM2 process
 if pm2 list | grep -q "$PM2_PROCESS_NAME"; then
     echo "Starting PM2 process: $PM2_PROCESS_NAME..."
-    pm2 start "/srv/scripts/startapp.sh ${PM2_PROCESS_NAME}" --name "$PM2_PROCESS_NAME" || { echo "Failed to start PM2 process: $PM2_PROCESS_NAME."; exit 1; }
+    pm2 start "$PM2_PROCESS_NAME" || { echo "Failed to start PM2 process: $PM2_PROCESS_NAME."; exit 1; }
     echo "PM2 process $PM2_PROCESS_NAME started successfully."
 else
     echo "Starting new PM2 process: $PM2_PROCESS_NAME with file path /srv/scripts/startapp.sh ${PM2_PROCESS_NAME}..."
