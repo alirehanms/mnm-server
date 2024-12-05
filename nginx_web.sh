@@ -1,10 +1,9 @@
 #!/bin/bash
 
-# Variables
-APP_NAME="$1"    # Application name
-DOMAIN="$2"      # Domain name
-APP_PATH="$3"    # Path to Angular app's dist folder
-CERT_PATH="$4"   # Path to SSL certificate directory (must contain fullchain.pem and privkey.pem)
+# Variables    # Application name
+DOMAIN="$1"      # Domain name
+APP_PATH="$2"    # Path to Angular app's dist folder
+CERT_PATH="$3"   # Path to SSL certificate directory (must contain fullchain.pem and privkey.pem)
 NGINX_CONF_DIR="/etc/nginx/sites-available"
 NGINX_ENABLED_DIR="/etc/nginx/sites-enabled"
 NGINX_CONF_FILE="${NGINX_CONF_DIR}/${DOMAIN}.conf"
@@ -36,8 +35,8 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Validate input
-if [ -z "$APP_NAME" ] || [ -z "$DOMAIN" ] || [ -z "$APP_PATH" ] || [ -z "$CERT_PATH" ]; then
-    print_error "Usage: $0 <app_name> <domain> <app_path> <cert_path>"
+if  [ -z "$DOMAIN" ] || [ -z "$APP_PATH" ] || [ -z "$CERT_PATH" ]; then
+    print_error "Usage: $0  <domain> <app_path> <cert_path>"
 fi
 
 # Ensure NGINX is installed

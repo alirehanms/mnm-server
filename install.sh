@@ -125,7 +125,7 @@ cd /srv/scripts
 cd /srv/3ulogging/repo
 GIT_SSH_COMMAND="ssh -i /srv/3ulogging/ssh/3ulogging -o StrictHostKeyChecking=no" git clone git@github.com:3ugg/logging-prod.git
 
-/srv/scripts/update_fetch_pm2.sh /srv/3ulogging/backup /srv/3ulogging/repo/3ulogging-prod /srv/3ulogging/ssh/3ulogging 3ulogging
+/srv/scripts/update_fetch_pm2.sh /srv/3ulogging/backup /srv/3ulogging/repo/logging-prod /srv/3ulogging/ssh/3ulogging 3ulogging
 /srv/scripts/nginx_proxy_ip.sh 37.27.189.44 3ulogging 9502
 
 # ========================================= geolocation ===========================================
@@ -200,10 +200,24 @@ nano serverapi.env
 
 /srv/scripts/update_fetch_pm2.sh /srv/3uadmin/backup /srv/3uadmin/repo/3uadmin-prod /srv/3uadmin/ssh/3uadmin 3uadmin
 
-#/srv/scripts/nginx_proxy_ip.sh 37.27.189.44 3uadmin 9504
 
 
 
+# ========================================= 3uauth ===========================================
+mkdir /srv/3uauth
+mkdir /srv/3uauth/prod
+mkdir /srv/3uauth/repo
+mkdir /srv/3uauth/conf
+mkdir /srv/3uauth/rbck
+mkdir /srv/3uauth/scripts
+mkdir /srv/3uauth/ssh
+
+ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f /srv/3uauth/ssh/3uauth -N ""
+cd /srv/3uauth/repo
+GIT_SSH_COMMAND="ssh -i /srv/3uauth/ssh/3uauth -o StrictHostKeyChecking=no" git clone git@github.com:3ugg/3uauth-prod.git
+
+/srv/scripts/update_fetch_pm2.sh /srv/3uauth/backup /srv/3uauth/repo/3uauth-prod /srv/3uauth/ssh/3uauth 3uauth
+/srv/scripts/nginx_ssl.sh auth.3u.gg 3uauth 9506
 # ========================================= 3uengine ===========================================
 mkdir /srv/3uengine
 mkdir /srv/3uengine/prod
@@ -220,7 +234,7 @@ cd /srv/3uengine/repo
 GIT_SSH_COMMAND="ssh -i /srv/3uengine/ssh/3uengine -o StrictHostKeyChecking=no" git clone git@github.com:3ugg/3uengine-prod.git
 
 /srv/scripts/update_fetch_pm2.sh /srv/3uengine/backup /srv/3uengine/repo/3uengine-prod /srv/3uengine/ssh/3uengine 3uengine
-/srv/scripts/nginx_ssl.sh 3u.gg 9501
+/srv/scripts/nginx_ssl.sh 3u.gg 3uengine 9501
 
 # ========================================= 3uadmingui ===========================================
 mkdir /srv/3uadmingui
@@ -241,6 +255,7 @@ GIT_SSH_COMMAND="ssh -i /srv/3uadmingui/ssh/3uadmingui -o StrictHostKeyChecking=
 
 /srv/scripts/update_static.sh /srv/3uadmingui/backup /srv/3uadmingui/repo/3uadmingui-prod /srv/3uadmingui/ssh/3uadmingui 
 
+/srv/scripts/nginx_web.sh admin.3u.gg /srv/3uadmingui/prod/dist /etc/letsencrypt/live/3u.gg
 # =================================================================================================================
 #git fetch origin
 #git reset --hard origin/main

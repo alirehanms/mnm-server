@@ -60,14 +60,7 @@ fi
 
 # Generate or renew the wildcard certificate
 echo "Requesting wildcard certificate for *.$DOMAIN..."
-certbot certonly \
-    --dns-"$DNS_PROVIDER" \
-    --dns-"$DNS_PROVIDER"-credentials /root/.secrets/certbot/"$DNS_PROVIDER".ini \
-    --dns-"$DNS_PROVIDER"-propagation-seconds 30 \
-    -d "*.$DOMAIN" -d "$DOMAIN" \
-    --email "$EMAIL" \
-    --agree-tos \
-    --non-interactive || print_error "Failed to generate or renew wildcard certificate."
+certbot certonly --manual --preferred-challenges dns -d "*.${DOMAIN}" -d "$DOMAIN" || print_error "Failed to generate or renew wildcard certificate."
 
 print_success "Wildcard certificate for *.$DOMAIN generated successfully."
 

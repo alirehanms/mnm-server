@@ -2,7 +2,9 @@
 
 # Variables
 DOMAIN="$1"
-APP_PORT="$2"
+APP_NAME="$2"
+APP_PORT="$3"
+SSL_CERT_PATH="$4"   # Path to the SSL certificate (passed as an argument)
 NGINX_CONF_DIR="/etc/nginx/sites-available"
 NGINX_ENABLED_DIR="/etc/nginx/sites-enabled"
 NGINX_CONF_FILE="${NGINX_CONF_DIR}/${DOMAIN}.conf"
@@ -22,22 +24,62 @@ function print_error {
     exit 1
 }
 
+function check_command {
+    if ! command -v "$1" &>/dev/null; then
+        print_error "$1 is not installed. Please install it first."
+    fi
+}
+
 # Check if the script is run as root
 if [ "$EUID" -ne 0 ]; then
     print_error "Please run as root"
 fi
 
 # Validate input
-if [ -z "$DOMAIN" ] || [ -z "$APP_PORT" ]; then
-    print_error "Usage: $0 <domain> <app_port>"
+if [ -z "$DOMAIN" ] || [ -z "$APP_PORT" ] ; then
+    print_error "Usage: $0 <domain> <app_name> <app_port>"
 fi
 
-# Create NGINX configuration
+# Ensure NGINX is installed
+check_command nginx
+
+# Determine the base domain
+if [[ $(echo "$DOMAIN" | grep -o '\.' | wc -l) -eq 1 ]]; then
+    BASE_DOMAIN="$DOMAIN"
+else
+    BASE_DOMAIN=$(echo "$DOMAIN" | sed 's/^[^.]*\.//')
+fi
+
+# Check if the SSL certificate directory exists for the base domain
+if [ ! -d "/etc/letsencrypt/live/$BASE_DOMAIN" ]; then
+    print_error "SSL certificate directory not found for $BASE_DOMAIN. Please ensure the certificate exists at /etc/letsencrypt/live/$BASE_DOMAIN."
+fi
+
+# Create NGINX configuration for SSL reverse proxy
 echo "Creating NGINX configuration for domain: $DOMAIN..."
+
 cat > "$NGINX_CONF_FILE" <<EOL
 server {
     listen 80;
     server_name $DOMAIN;
+
+    # Redirect HTTP to HTTPS
+    return 301 https://\$host\$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name $DOMAIN;
+
+    # SSL configuration
+    ssl_certificate /etc/letsencrypt/live/$BASE_DOMAIN/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$BASE_DOMAIN/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/$BASE_DOMAIN/chain.pem;
+
+    # SSL settings (optional but recommended)
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers 'ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-AES128-GCM-SHA256:...';
+    ssl_prefer_server_ciphers off;
 
     location / {
         proxy_pass http://127.0.0.1:$APP_PORT;
@@ -60,26 +102,5 @@ echo "Reloading NGINX..."
 nginx -s reload || print_error "Failed to reload NGINX."
 print_success "NGINX configuration for $DOMAIN has been added and reloaded."
 
-# Install Certbot if not installed
-if ! command -v certbot &>/dev/null; then
-    echo "Installing Certbot..."
-    apt update && apt install -y certbot python3-certbot-nginx || print_error "Failed to install Certbot."
-fi
-
-# Check if a wildcard SSL certificate already exists for the domain
-if certbot certificates | grep -q "$DOMAIN"; then
-    print_success "Wildcard SSL certificate already exists for $DOMAIN."
-else
-    # Obtain a wildcard SSL certificate if not already available
-    echo "Obtaining wildcard SSL certificate for $DOMAIN..."
-    certbot --nginx -d "*.$DOMAIN" --non-interactive --agree-tos -m "admin@$DOMAIN" || print_error "Failed to obtain wildcard SSL certificate."
-    print_success "Wildcard SSL certificate obtained for $DOMAIN."
-fi
-
-# Reload NGINX after SSL configuration
-echo "Reloading NGINX after SSL setup..."
-nginx -s reload || print_error "Failed to reload NGINX after SSL setup."
-print_success "SSL certificate has been installed and NGINX has been reloaded."
-
 # Success message
-print_success "Setup completed! Your app is now accessible at https://$DOMAIN"
+print_success "Setup completed! Your app is now accessible at https://$DOMAIN/$APP_NAME"
