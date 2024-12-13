@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # Variables
-DOMAIN="$1"           # Base domain for the wildcard certificate (e.g., example.com)
-DNS_PROVIDER="$2"     # DNS provider for Certbot (e.g., cloudflare, route53, etc.)
-EMAIL="$3"            # Email address for Certbot registration
+DOMAIN="${1}"          
 CERT_PATH="/etc/letsencrypt/live/$DOMAIN"
 NGINX_RELOAD_COMMAND="nginx -s reload"
 
@@ -40,8 +38,8 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Validate input
-if [ -z "$DOMAIN" ] || [ -z "$DNS_PROVIDER" ] || [ -z "$EMAIL" ]; then
-    print_error "Usage: $0 <domain> <dns_provider> <email>"
+if [ -z "$DOMAIN" ]; then
+    print_error "Usage: $0 <domain>"
 fi
 
 # Ensure required tools are installed
@@ -49,9 +47,7 @@ if ! command -v certbot &>/dev/null; then
     install_package certbot
 fi
 
-if ! dpkg -l | grep -q "python3-certbot-dns-$DNS_PROVIDER"; then
-    install_package "python3-certbot-dns-$DNS_PROVIDER"
-fi
+
 
 # Ensure NGINX is installed
 if ! command -v nginx &>/dev/null; then

@@ -8,5 +8,6 @@ APP_NAME="$1"
 set +o history 
 random_string=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 41) >/dev/null2 >&1
 mysql -e "ALTER USER ${APP_NAME}@'localhost' IDENTIFIED BY '$random_string';"
+cd /srv
 nodejs /srv/${APP_NAME}/prod/dist/index.js $random_string
 set -o history

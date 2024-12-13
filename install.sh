@@ -54,31 +54,23 @@ eval "$(ssh-agent -s)"
 ssh-add /srv/3ulogging/ssh/3uLoggingDB
 
 #================================= common scripts===============================
-# Install Nginx
-sudo apt install nginx -y
-sudo ufw allow 22
-sudo ufw allow 'Nginx HTTP'
-sudo ufw allow 'Nginx HTTPS'
-sudo ufw enable -y
-sudo systemctl restart nginx
-sudo systemctl start nginx
-
-# Node installation..
-sudo apt-get install -y curl
-curl -fsSL https://deb.nodesource.com/setup_23.x -o nodesource_setup.sh
-sudo -E bash nodesource_setup.sh
-sudo apt-get install -y nodejs
-node -v
-
-#sudo pm2 completion install
-sudo npm install pm2@latest -g && pm2 update
-
-mkdir /srv/scripts
-
 #Install mysql community server..
 nano mysql.sh
 chmod +x mysql.sh
 ./mysql.sh 
+
+# Install Nginx
+nano mysql.sh
+chmod +x mysql.sh
+./install_nginx.sh
+
+# Node installation..
+nano mysql.sh
+chmod +x mysql.sh
+./install_node_pm2.sh
+
+mkdir /srv/scripts
+#create general scripts..
 
 nano mysql_user.sh
 chmod +x mysql_user.sh
@@ -98,10 +90,33 @@ chmod +x startapp.sh
 nano update_static.sh
 chmod +x update_static.sh
 
+nano generate-cert.sh
+chmod +x generate-cert.sh
+
+nano nginx_ssl_websocket.sh
+chmod +x nginx_ssl_websocket.sh
+
 #================================== apps =======================================
 mkdir /srv/MnM
 mkdir /srv/cnfg
 mkdir /srv/replaylogs
+
+
+# ========================================== mnmserver ==========================================
+mkdir /srv/mnmserver
+mkdir /srv/mnmserver/prod
+mkdir /srv/mnmserver/repo
+mkdir /srv/mnmserver/conf
+mkdir /srv/mnmserver/rbck
+mkdir /srv/mnmserver/scripts
+mkdir /srv/mnmserver/ssh
+
+ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f /srv/mnmserver/ssh/mnmserver -N ""
+cd /srv/mnmserver/repo
+GIT_SSH_COMMAND="ssh -i /srv/mnmserver/ssh/mnmserver -o StrictHostKeyChecking=no" git clone git@github.com:MnMsys/mnmserver-prod.git
+
+/srv/scripts/update_fetch_pm2.sh /srv/mnmserver/backup /srv/mnmserver/repo/mnmserver-prod /srv/mnmserver/ssh/mnmserver mnmserver
+/srv/scripts/nginx_ssl_websocket.sh mnms.io mnmserver 9512
 
 # ========================================== 3ulogging ==========================================
 mkdir /srv/3ulogging
@@ -257,52 +272,7 @@ GIT_SSH_COMMAND="ssh -i /srv/3uadmingui/ssh/3uadmingui -o StrictHostKeyChecking=
 
 /srv/scripts/nginx_web.sh admin.3u.gg /srv/3uadmingui/prod/dist /etc/letsencrypt/live/3u.gg
 # =================================================================================================================
-#git fetch origin
-#git reset --hard origin/main
 
-# Fetch updates from the remote repository
-echo "Fetching updates from remote..."
-git fetch origin
-
-# Check for changes
-echo "Checking for changes..."
-CHANGES=$(git diff --name-only "origin/$BRANCH")
-
-if [[ -z "$CHANGES" ]]; then
-    echo "No changes detected. Repository is up-to-date."
-    exit 0
-fi
-
-echo "Changes detected:"
-echo "$CHANGES"
-
-# Back up the current repository folder
-echo "Backing up current repository..."
-zip -r "$BACKUP_FILE" . > /dev/null
-if [[ $? -eq 0 ]]; then
-    echo "Backup created successfully: $BACKUP_FILE"
-else
-    echo "Failed to create backup."
-    exit 1
-fi
-
-
-
-
-
-
-
-
-
-
-# bashscript.sh
-set +o history 
-random_string=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32) >/dev/null2 >&1
-mysql -e "ALTER USER 'app'@'localhost' IDENTIFIED BY '$random_string';"
-nodejs /var/api/3u-engine/dist/index.js $random_string
-set -o history
-
-pm2 start bashscript.sh --name '3u' --interpreter bash
 
 
 
