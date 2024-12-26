@@ -14,8 +14,8 @@ for arg in "$@"; do
 done
 
 fileName='/etc/mysql/mysql.conf.d/mysqld.cnf'
-paramName='innodb_buffer_pool_size'
-value='1000000000'
+paramName="$1"
+value="$2"
 grep -q "^[[:space:]]*#*[[:space:]]*$paramName" $fileName && sed -i 's/^[[:space:]]*#*[[:space:]]*$paramName.*/$paramName=$value/' $fileName || echo "$paramName=$value" >>$fileName
 
-mysql -e "SET GLOBAL $paramName=$value"
+# mysql -e "SET GLOBAL $paramName=$value"
