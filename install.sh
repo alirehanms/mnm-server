@@ -96,6 +96,38 @@ chmod +x generate-cert.sh
 nano nginx_ssl_websocket.sh
 chmod +x nginx_ssl_websocket.sh
 
+
+
+
+#================================== mnmagent =======================================
+npm i mnm-pm -g
+
+
+
+
+
+sudo nano /etc/systemd/system/MnM.service
+
+[Unit]
+Description='MnM Agent'
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/node /srv/mnm/app.js
+WorkingDirectory=/var/www/MnM/
+Restart=always
+User=root
+Group=nogroup
+Environment=NODE_ENV=production
+# Log file
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=MnM
+
+[Install]
+WantedBy=multi-user.target
+
+
 #================================== apps =======================================
 mkdir /srv/MnM
 mkdir /srv/cnfg
@@ -141,7 +173,7 @@ cd /srv/3ulogging/repo
 GIT_SSH_COMMAND="ssh -i /srv/3ulogging/ssh/3ulogging -o StrictHostKeyChecking=no" git clone git@github.com:3ugg/logging-prod.git
 
 /srv/scripts/update_fetch_pm2.sh /srv/3ulogging/backup /srv/3ulogging/repo/logging-prod /srv/3ulogging/ssh/3ulogging 3ulogging
-/srv/scripts/nginx_proxy_ip.sh 37.27.189.44 3ulogging 9502
+/srv/scripts/nginx_proxy_ip.sh 167.235.25.26 3ulogging 9502
 
 # ========================================= geolocation ===========================================
 mkdir /srv/geolocation
@@ -250,7 +282,7 @@ GIT_SSH_COMMAND="ssh -i /srv/3uengine/ssh/3uengine -o StrictHostKeyChecking=no" 
 
 /srv/scripts/update_fetch_pm2.sh /srv/3uengine/backup /srv/3uengine/repo/3uengine-prod /srv/3uengine/ssh/3uengine 3uengine
 /srv/scripts/nginx_ssl.sh 3u.gg 3uengine 9501
-
+/home/scripts/nginx_ssl.sh auth.xdoc.app xdocAuth 3333
 # ========================================= 3uadmingui ===========================================
 mkdir /srv/3uadmingui
 mkdir /srv/3uadmingui/prod
@@ -276,3 +308,76 @@ GIT_SSH_COMMAND="ssh -i /srv/3uadmingui/ssh/3uadmingui -o StrictHostKeyChecking=
 
 
 
+
+
+# ========================================= xdoc ===========================================
+mkdir /srv/xdoc
+mkdir /srv/xdoc/prod
+mkdir /srv/xdoc/repo
+mkdir /srv/xdoc/conf
+mkdir /srv/xdoc/rbck
+mkdir /srv/xdoc/scripts
+mkdir /srv/xdoc/ssh
+
+ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f /srv/xdoc/ssh/xdoc -N ""
+ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f /srv/xdoc/ssh/xdocdb -N ""
+
+cd /srv/xdoc/repo
+GIT_SSH_COMMAND="ssh -i /srv/xdoc/ssh/xdoc -o StrictHostKeyChecking=no" git clone git@github.com:xdocapp/api-prod.git
+/srv/scripts/nginx_ssl.sh api.xdoc.app xdoc 3000
+
+
+* * * * * /bin/bash /srv/scripts/update_fetch_pm2.sh /srv/xdoc/backup /srv/xdoc/repo/api-prod /srv/xdoc/ssh/xdoc xdoc >> /tmp/update_xdoc.log 2>&1
+cd /srv/xdoc/repo
+GIT_SSH_COMMAND="ssh -i /srv/xdoc/ssh/xdocdb -o StrictHostKeyChecking=no" git clone git@github.com:xdocapp/db.git
+
+
+* * * * * /bin/bash  /srv/scripts/update_db.sh  /srv/xdoc/backup/mysql /srv/xdoc/repo/db   /srv/xdoc/ssh/xdocdb xdoc >> /tmp/cronjob.log 2>&1
+
+
+# ========================================= xdocgui ===========================================
+mkdir /srv/xdocgui
+mkdir /srv/xdocgui/prod
+mkdir /srv/xdocgui/repo
+mkdir /srv/xdocgui/conf
+mkdir /srv/xdocgui/rbck
+mkdir /srv/xdocgui/scripts
+mkdir /srv/xdocgui/ssh
+
+ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f /srv/xdocgui/ssh/xdocgui -N ""
+/srv/scripts/mysql_user.sh xdocgui
+
+cd /srv/xdocgui/repo
+GIT_SSH_COMMAND="ssh -i /srv/xdocgui/ssh/xdocgui -o StrictHostKeyChecking=no" git clone git@github.com:xdocapp/web.git
+
+#/srv/scripts/deploy_angular_nginx.sh my-app myapp.example.com /var/www/my-app/dist /etc/letsencrypt/live/example.com
+
+* * * * * /bin/bash /srv/scripts/update_static.sh /srv/xdocgui/backup /srv/xdocgui/repo/web /srv/xdocgui/ssh/xdocgui >> /tmp/update_xdocgui.log 2>&1
+
+ /srv/scripts/update_static_prod.sh /srv/xdocgui/backup /srv/xdocgui/repo/web 
+
+/srv/scripts/nginx_web.sh s.xdoc.app /srv/xdocgui/prod/web /etc/letsencrypt/live/xdoc.app
+# =================================================================================================================
+
+
+
+
+
+# ========================================= uids ===========================================
+mkdir /srv/uids
+mkdir /srv/uids/prod
+mkdir /srv/uids/repo
+mkdir /srv/uids/conf
+mkdir /srv/uids/rbck
+mkdir /srv/uids/scripts
+mkdir /srv/uids/ssh
+
+ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f /srv/uids/ssh/uids -N ""
+
+cd /srv/uids/repo
+GIT_SSH_COMMAND="ssh -i /srv/uids/ssh/uids -o StrictHostKeyChecking=no" git clone git@github.com:uids-io/api-prod.git
+
+* * * * * /bin/bash /srv/uids/scripts/update_fetch_pm2.sh /srv/uids/backup /srv/uids/repo/api-prod /srv/uids/ssh/uids uids >> /tmp/AuthApi.log 2>&1
+/srv/scripts/nginx_ssl.sh api.uids.app uids 3333
+
+* * * * * /bin/bash  /srv/scripts/update_db.sh  /srv/uids/backup/mysql /srv/uids/repo/db   /srv/uids/ssh/uidsdb uids >> /tmp/cronjob.log 2>&1

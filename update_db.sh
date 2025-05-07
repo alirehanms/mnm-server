@@ -42,7 +42,7 @@ GIT_SSH_COMMAND="ssh -i ${SSH_PATH} -o StrictHostKeyChecking=no" git reset --har
 echo "Repository updated successfully."
 
 # Identify changed SQL files
-echo "Filtering changed SQL files..."
+echo "Filtering changed SQL files..."mysq
 CHANGED_SQL_FILES=$(echo "$CHANGES" | grep '\.sql$' | sort)
 # If no changed SQL files are found, exit
 if [[ -z "$CHANGED_SQL_FILES" ]]; then
@@ -50,7 +50,7 @@ if [[ -z "$CHANGED_SQL_FILES" ]]; then
     exit 0
 fi
 
-mysql -e "ALTER USER ${DB_USER}@localhost IDENTIFIED BY '${DB_PASSWORD}';"
+#mysql -e "ALTER USER ${DB_USER}@localhost IDENTIFIED BY '${DB_PASSWORD}';"
 #Backup schema..
 echo "Creating backup of database $DB_NAME..."
 mysqldump -u "$DB_USER" -p"$DB_PASSWORD" --no-data --single-transaction "$DB_NAME" > "$BACKUP_FILE" 2>>"$LOG_FILE"

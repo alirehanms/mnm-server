@@ -90,7 +90,7 @@ if pm2 list | grep -q "$PM2_PROCESS_NAME"; then
     echo "PM2 process $PM2_PROCESS_NAME started successfully."
 else
     echo "Starting new PM2 process: $PM2_PROCESS_NAME with file path /srv/scripts/startapp.sh ${PM2_PROCESS_NAME}..."
-    pm2 start "/srv/scripts/startapp.sh ${PM2_PROCESS_NAME}" --name "$PM2_PROCESS_NAME" || { echo "Failed to start new PM2 process."; exit 1; }
+    pm2 start "nodejs /srv/${PM2_PROCESS_NAME}/prod/dist/index.js" --name "$PM2_PROCESS_NAME" || { echo "Failed to start new PM2 process."; exit 1; }
     echo "New PM2 process $PM2_PROCESS_NAME started successfully."
 fi
 

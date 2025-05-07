@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  app-provisioner:
+    image: ubuntu-provisioning:latest
+    container_name: app-provisioner
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./scripts:/provisioning/scripts
+    environment:
+      - APP_NAME=3uengine
+      - DATABASE_NAME=3uengine
+    network_mode: "host"
