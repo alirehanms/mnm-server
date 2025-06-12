@@ -381,3 +381,20 @@ GIT_SSH_COMMAND="ssh -i /srv/uids/ssh/uids -o StrictHostKeyChecking=no" git clon
 /srv/scripts/nginx_ssl.sh api.uids.app uids 3333
 
 * * * * * /bin/bash  /srv/scripts/update_db.sh  /srv/uids/backup/mysql /srv/uids/repo/db   /srv/uids/ssh/uidsdb uids >> /tmp/cronjob.log 2>&1
+
+
+=======================================================================
+
+mkdir /srv/cannons.dev
+mkdir /srv/cannons.dev/prod
+mkdir /srv/cannons.dev/repo
+mkdir /srv/cannons.dev/conf
+mkdir /srv/cannons.dev/rbck
+mkdir /srv/cannons.dev/scripts
+mkdir /srv/cannons.dev/ssh
+
+ssh-keygen -t ed25519 -C "dev1@hostingcontroller.com" -f /srv/cannons.dev/ssh/static -N ""
+
+cd /srv/cannons.dev/repo
+GIT_SSH_COMMAND="ssh -i  /srv/cannons.dev/ssh/static -o StrictHostKeyChecking=no" git clone git@github.com:canonicalapp/www.git
+
