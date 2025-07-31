@@ -1,0 +1,7 @@
+syntax = "proto3";
+package mnm;
+
+service Deploy {
+  rpc Notify(Empty) returns (Empty);
+}
+message Empty {}
