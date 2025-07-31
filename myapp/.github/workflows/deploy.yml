@@ -3,7 +3,7 @@ name: Notify MnM Server
 on:
   push:
     branches:
-      - master  # Or 'main' if your repo uses main branch
+      - master  
 
 jobs:
   notify:

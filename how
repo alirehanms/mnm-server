@@ -1,0 +1,83 @@
+[33mcommit 6c53ac52b14a3dcd7508be815391bde65628d026[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: ehan-slam <ehan@example.com>
+Date:   Thu Jul 31 09:53:31 2025 +0000
+
+    Add GitHub Action to notify MnM server
+
+[33mcommit 616e2ad05a6572dd5cdacf0c8be1eed99a6f6c83[m
+Author: dev1 <dev1@hostingcontroller.com>
+Date:   Tue Jul 15 15:46:30 2025 +0500
+
+    grafana on localhost
+
+[33mcommit 8cfa6e02f06d6f7dfeeddd06d671b494cb8f63ec[m
+Author: dev1 <dev1@hostingcontroller.com>
+Date:   Thu Jun 12 12:07:56 2025 +0500
+
+    installing postgres container for windows
+
+[33mcommit 6407308dae9d22320bbe510538b75b1cc1d1dcfe[m
+Author: dev1 <dev1@hostingcontroller.com>
+Date:   Wed May 7 16:45:28 2025 +0500
+
+    podman, IPv6, grpc
+
+[33mcommit 8e881208484ea9e8135ba2f142feef6b609a6efd[m
+Author: Hosting Controller <dev1@hostingcontroller.com>
+Date:   Thu Dec 26 14:23:48 2024 +0500
+
+    mysql Configuration Script and key-value replacement in file
+
+[33mcommit db15b5b1d502f8c3782c147554825af45d3a1e14[m
+Author: Hosting Controller <dev1@hostingcontroller.com>
+Date:   Fri Dec 13 19:21:02 2024 +0500
+
+    Live
+
+[33mcommit 10ceace72f8995972c552f2779efa5dd6d849f9b[m
+Author: Hosting Controller <dev1@hostingcontroller.com>
+Date:   Thu Dec 5 16:49:17 2024 +0500
+
+    updated scripts till 3uauth
+
+[33mcommit 384c6a64523c2ff358f06314da696c702cf8ae34[m
+Author: Hosting Controller <dev1@hostingcontroller.com>
+Date:   Wed Dec 4 15:08:46 2024 +0500
+
+    pm2 bug fixed + angular update.
+
+[33mcommit 20eea3bd5ead103c9decc34221e93639e2c5ad6d[m
+Author: Hosting Controller <dev1@hostingcontroller.com>
+Date:   Tue Dec 3 20:31:14 2024 +0500
+
+    admin_backend deployed
+
+[33mcommit bcc44517998f67ea0638f49af84842c2ff873ec1[m
+Author: Hosting Controller <dev1@hostingcontroller.com>
+Date:   Tue Dec 3 18:32:04 2024 +0500
+
+    nginxssl
+
+[33mcommit 331008b7bfaba52c4250c99f6e09e8b35295bd36[m
+Author: Hosting Controller <dev1@hostingcontroller.com>
+Date:   Tue Dec 3 16:36:01 2024 +0500
+
+    import script updated
+
+[33mcommit d2c34a9c017ee8e48dc82f46a7ea1e948d74af16[m
+Author: Hosting Controller <dev1@hostingcontroller.com>
+Date:   Tue Dec 3 15:34:22 2024 +0500
+
+    Scripts update related to geolocation
+
+[33mcommit 98a067c16fb1efee8066125ecb95856c245ca37e[m
+Author: Harley Davidson <harley.dvdson@gmail.com>
+Date:   Fri Nov 22 22:05:50 2024 +0500
+
+    changing out.txt to mysql command prompt
+
+[33mcommit a1eb0b0cdb473820c6e3aefcc64d1d2b5df0d05c[m
+Author: Hosting Controller <dev1@hostingcontroller.com>
+Date:   Fri Nov 22 20:06:07 2024 +0500
+
+    Initial Commit
