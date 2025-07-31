@@ -1,0 +1,16 @@
+name: Notify MnM Server
+
+on:
+  push:
+    branches:
+      - master  # Or 'main' if your repo uses main branch
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send deploy event to MnM server
+        run: |
+          curl -X POST http://95.216.209.142:3000/deploy \
+               -H "Content-Type: application/json" \
+               -d '{"repo": "${{ github.repository }}", "ref": "${{ github.ref }}", "commit": "${{ github.sha }}"}'
